@@ -1,0 +1,38 @@
+
+services:
+  kurento:
+    image: kurento/kurento-media-server:latest
+    container_name: kurento-media-server
+    ports:
+      - "8888:8888"  # WebSocket для взаимодействия с Kurento
+    networks:
+      - media_network
+
+#  asterisk:
+#    image: asterisk/asterisk:latest
+#    container_name: asterisk
+#    ports:
+#      - "5060:5060"  # SIP порт
+#    volumes:
+#      - ./config/asterisk:/etc/asterisk
+#    networks:
+#      - media_network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kurento-app
+    depends_on:
+      - kurento
+#      - asterisk
+    networks:
+      - media_network
+    volumes:
+      - ./scripts:/scripts
+    environment:
+      - KMS_WS_URI=ws://kurento:8888/kurento
+
+networks:
+  media_network:
+    driver: bridge
